@@ -63,6 +63,7 @@ const addLayer = (_id, _position, _size) => {
   let elements = [];
   let elementCount = 0;
   let elementIdsForRarity = {};
+
   rarityWeights.forEach((rarityWeight) => {
     let elementsForRarity = getElements(`${dir}/${_id}/${rarityWeight.value}`);
 
@@ -117,9 +118,9 @@ const addRarityPercentForLayer = (_rarityId, _layerId, _percentages) => {
  *************************************************************/
 
 // image width in pixels
-const width = 16;
+const width = 1000;
 // image height in pixels
-const height = 18;
+const height = 1000;
 // description for NFT in metadata file
 const description = "This is an NFT made by the coolest generative code.";
 // base url to use in metadata file
