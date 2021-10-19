@@ -1,6 +1,7 @@
 const fs = require("fs");
 const dir = __dirname;
 const { createCanvas, loadImage } = require("canvas");
+
 const width = 240;
 const height = 240;
 
@@ -19,33 +20,54 @@ const getElements = (partition, i) => {
   pngs = pngs.filter((item) => !/(^|\/)\.[^\/\.]/g.test(item)); // Remove .DS_Store
   const selected = pngs[i % pngs.length];
 
-  return { id: i, name: selected.slice(0, -4), path: `${path}/${selected}` };
+  return {
+    id: i % pngs.length,
+    name: selected.slice(0, -4),
+    path: `${path}/${selected}`,
+  };
 };
 
-const generate = async (itemNum) => {
+const generateMetadata = (edition, attributes, description) => {
+  const baseImageUri = "https://ipfs.io/ipfs";
+
+  let tempMetadata = {
+    name: `#${edition}`,
+    description: description,
+    image: `${baseImageUri}/${edition}`,
+    external_url: `${baseImageUri}/${edition}`,
+    edition: edition,
+    date: Date.now(),
+    attributes: attributes,
+  };
+  return tempMetadata;
+};
+
+const generateFourSquares = async () => {
+  let attributesList = [];
+
   let hue = Math.floor(Math.random() * 360);
   ctx.fillStyle = `hsl(${hue}, 100%, 85%)`;
   ctx.fillRect(0, 0, width, height);
 
-  console.log(randInt(100), hue);
-  let image = await loadImage(getElements("partition1", randInt(100)).path);
-  ctx.drawImage(image, 0, 0, width, height);
+  for (let i = 1; i <= 4; i++) {
+    const partition = `partition${i}`;
+    const el = getElements(partition, randInt(100));
+    ctx.drawImage(await loadImage(el.path), 0, 0, width, height);
+    attributesList.push({ [partition]: el.name });
+  }
 
-  image = await loadImage(getElements("partition2", randInt(100)).path);
-  ctx.drawImage(image, 0, 0, width, height);
-
-  image = await loadImage(getElements("partition3", randInt(100)).path);
-  ctx.drawImage(image, 0, 0, width, height);
-
-  image = await loadImage(getElements("partition4", randInt(100)).path);
-  ctx.drawImage(image, 0, 0, width, height);
-
-  fs.writeFileSync(`./output/${itemNum}.png`, canvas.toBuffer("image/png"));
+  return attributesList;
 };
 
 async function processArray() {
-  for (let i = 0; i < 20; i++) {
-    await generate(i);
+  const totalItems = 10;
+
+  for (let i = 0; i < totalItems; i++) {
+    const attributes = await generateFourSquares();
+    const metaData = generateMetadata(i, attributes);
+
+    fs.writeFileSync(`./output/${i}.png`, canvas.toBuffer("image/png"));
+    fs.writeFileSync(`./output/metadata${i}.json`, JSON.stringify(metaData));
   }
 }
 
