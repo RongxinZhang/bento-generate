@@ -15,7 +15,7 @@ const addRarity = (_id, _from, _to) => {
     value: _id,
     from: _from,
     to: _to,
-    layerPercent: {}
+    layerPercent: {},
   };
   return _rarityWeight;
 };
@@ -35,12 +35,12 @@ const getElements = (_path, _elementCount) => {
       return {
         id: _elementCount,
         name: cleanName(i),
-        path: `${_path}/${i}`
+        path: `${_path}/${i}`,
       };
     });
 };
 
-// adds a layer to the configuration. The layer will hold information on all the defined parts and 
+// adds a layer to the configuration. The layer will hold information on all the defined parts and
 // where they should be rendered in the image
 // @param _id - id of the layer
 // @param _position - on which x/y value to render this part
@@ -48,14 +48,14 @@ const getElements = (_path, _elementCount) => {
 // @return a layer object used to dynamically generate the NFTs
 const addLayer = (_id, _position, _size) => {
   if (!_id) {
-    console.log('error adding layer, parameters id required');
+    console.log("error adding layer, parameters id required");
     return null;
   }
   if (!_position) {
     _position = { x: 0, y: 0 };
   }
   if (!_size) {
-    _size = { width: width, height: height }
+    _size = { width: width, height: height };
   }
   // add two different dimension for elements:
   // - all elements with their path information
@@ -72,7 +72,7 @@ const addLayer = (_id, _position, _size) => {
       elements.push(_elementForRarity);
       elementIdsForRarity[rarityWeight.value].push(_elementForRarity.id);
       elementCount++;
-    })
+    });
     elements[rarityWeight.value] = elementsForRarity;
   });
 
@@ -81,7 +81,7 @@ const addLayer = (_id, _position, _size) => {
     position: _position,
     size: _size,
     elements,
-    elementIdsForRarity
+    elementIdsForRarity,
   };
   return elementsForLayer;
 };
@@ -98,26 +98,28 @@ const addRarityPercentForLayer = (_rarityId, _layerId, _percentages) => {
       for (let percentType in _percentages) {
         _percentArray.push({
           id: percentType,
-          percent: _percentages[percentType]
-        })
+          percent: _percentages[percentType],
+        });
       }
       _rarityWeight.layerPercent[_layerId] = _percentArray;
       _rarityFound = true;
     }
   });
   if (!_rarityFound) {
-    console.log(`rarity ${_rarityId} not found, failed to add percentage information`);
+    console.log(
+      `rarity ${_rarityId} not found, failed to add percentage information`
+    );
   }
-}
+};
 
 /**************************************************************
  * BEGIN CONFIG
  *************************************************************/
 
 // image width in pixels
-const width = 1000;
+const width = 16;
 // image height in pixels
-const height = 1000;
+const height = 18;
 // description for NFT in metadata file
 const description = "This is an NFT made by the coolest generative code.";
 // base url to use in metadata file
@@ -128,33 +130,45 @@ const startEditionFrom = 1;
 // amount of NFTs to generate in edition
 const editionSize = 10;
 // prefix to add to edition dna ids (to distinguish dna counts from different generation processes for the same collection)
-const editionDnaPrefix = 0
+const editionDnaPrefix = 0;
 
 // create required weights
 // for each weight, call 'addRarity' with the id and from which to which element this rarity should be applied
 let rarityWeights = [
-  addRarity('super_rare', 1, 1),
-  addRarity('rare', 2, 5),
-  addRarity('original', 5, 10)
+  addRarity("super_rare", 1, 1),
+  addRarity("rare", 2, 5),
+  addRarity("original", 5, 10),
 ];
 
 // create required layers
 // for each layer, call 'addLayer' with the id and optionally the positioning and size
 // the id would be the name of the folder in your input directory, e.g. 'ball' for ./input/ball
 const layers = [
-  addLayer('ball', { x: 0, y: 0 }, { width: width, height: height }),
-  addLayer('eye color'),
-  addLayer('iris'),
-  addLayer('shine'),
-  addLayer('bottom lid'),
-  addLayer('top lid')
+  addLayer("ball", { x: 0, y: 0 }, { width: width, height: height }),
+  addLayer("eye color"),
+  addLayer("iris"),
+  addLayer("shine"),
+  addLayer("bottom lid"),
+  addLayer("top lid"),
 ];
 
 // provide any specific percentages that are required for a given layer and rarity level
 // all provided options are used based on their percentage values to decide which layer to select from
-addRarityPercentForLayer('super_rare', 'ball', { 'super_rare': 33, 'rare': 33, 'original': 33 });
-addRarityPercentForLayer('super_rare', 'eye color', { 'super_rare': 50, 'rare': 25, 'original': 25 });
-addRarityPercentForLayer('original', 'eye color', { 'super_rare': 50, 'rare': 25, 'original': 25 });
+addRarityPercentForLayer("super_rare", "ball", {
+  super_rare: 33,
+  rare: 33,
+  original: 33,
+});
+addRarityPercentForLayer("super_rare", "eye color", {
+  super_rare: 50,
+  rare: 25,
+  original: 25,
+});
+addRarityPercentForLayer("original", "eye color", {
+  super_rare: 50,
+  rare: 25,
+  original: 25,
+});
 
 module.exports = {
   layers,

@@ -10,6 +10,7 @@ const {
   startEditionFrom,
   rarityWeights,
 } = require("./input/config.js");
+
 const console = require("console");
 const canvas = createCanvas(width, height);
 const ctx = canvas.getContext("2d");
@@ -92,18 +93,20 @@ const drawElement = (_element) => {
 // drawing on a canvas
 const constructLayerToDna = (_dna = [], _layers = [], _rarity) => {
   let mappedDnaToLayers = _layers.map((layer, index) => {
-    let selectedElement = layer.elements.find(element => element.id === _dna[index]);
+    let selectedElement = layer.elements.find(
+      (element) => element.id === _dna[index]
+    );
     return {
       location: layer.location,
       position: layer.position,
       size: layer.size,
-      selectedElement: {...selectedElement, rarity: _rarity },
+      selectedElement: { ...selectedElement, rarity: _rarity },
     };
   });
   return mappedDnaToLayers;
 };
 
-// check if the given dna is contained within the given dnaList 
+// check if the given dna is contained within the given dnaList
 // return true if it is, indicating that this dna is already in use and should be recalculated
 const isDnaUnique = (_DnaList = [], _dna = []) => {
   let foundDna = _DnaList.find((i) => i.join("") === _dna.join(""));
@@ -117,24 +120,30 @@ const getRandomRarity = (_rarityOptions) => {
   for (let i = 0; i <= _rarityOptions.length; i++) {
     percentCount += _rarityOptions[i].percent;
     if (percentCount >= randomPercent) {
-      console.log(`use random rarity ${_rarityOptions[i].id}`)
+      console.log(`use random rarity ${_rarityOptions[i].id}`);
       return _rarityOptions[i].id;
     }
   }
   return _rarityOptions[0].id;
-}
+};
 
 // create a dna based on the available layers for the given rarity
 // use a random part for each layer
 const createDna = (_layers, _rarity) => {
   let randNum = [];
-  let _rarityWeight = rarityWeights.find(rw => rw.value === _rarity);
+  let _rarityWeight = rarityWeights.find((rw) => rw.value === _rarity);
   _layers.forEach((layer) => {
-    let num = Math.floor(Math.random() * layer.elementIdsForRarity[_rarity].length);
+    let num = Math.floor(
+      Math.random() * layer.elementIdsForRarity[_rarity].length
+    );
     if (_rarityWeight && _rarityWeight.layerPercent[layer.id]) {
       // if there is a layerPercent defined, we want to identify which dna to actually use here (instead of only picking from the same rarity)
-      let _rarityForLayer = getRandomRarity(_rarityWeight.layerPercent[layer.id]);
-      num = Math.floor(Math.random() * layer.elementIdsForRarity[_rarityForLayer].length);
+      let _rarityForLayer = getRandomRarity(
+        _rarityWeight.layerPercent[layer.id]
+      );
+      num = Math.floor(
+        Math.random() * layer.elementIdsForRarity[_rarityForLayer].length
+      );
       randNum.push(layer.elementIdsForRarity[_rarityForLayer][num]);
     } else {
       randNum.push(layer.elementIdsForRarity[_rarity][num]);
@@ -169,13 +178,13 @@ let dnaListByRarity = {};
 let metadataList = [];
 // Create generative art by using the canvas api
 const startCreating = async () => {
-  console.log('##################');
-  console.log('# Generative Art');
-  console.log('# - Create your NFT collection');
-  console.log('##################');
+  console.log("##################");
+  console.log("# Generative Art");
+  console.log("# - Create your NFT collection");
+  console.log("##################");
 
   console.log();
-  console.log('start creating NFTs.')
+  console.log("start creating NFTs.");
 
   // clear meta data from previous run
   writeMetaData("");
@@ -188,22 +197,24 @@ const startCreating = async () => {
   // create NFTs from startEditionFrom to editionSize
   let editionCount = startEditionFrom;
   while (editionCount <= editionSize) {
-    console.log('-----------------')
-    console.log('creating NFT %d of %d', editionCount, editionSize);
+    console.log("-----------------");
+    console.log("creating NFT %d of %d", editionCount, editionSize);
 
     // get rarity from to config to create NFT as
     let rarity = getRarity(editionCount);
-    console.log('- rarity: ' + rarity);
+    console.log("- rarity: " + rarity);
 
-    // calculate the NFT dna by getting a random part for each layer/feature 
+    // calculate the NFT dna by getting a random part for each layer/feature
     // based on the ones available for the given rarity to use during generation
     let newDna = createDna(layers, rarity);
     while (!isDnaUnique(dnaListByRarity[rarity], newDna)) {
       // recalculate dna as this has been used before.
-      console.log('found duplicate DNA ' + newDna.join('-') + ', recalculate...');
+      console.log(
+        "found duplicate DNA " + newDna.join("-") + ", recalculate..."
+      );
       newDna = createDna(layers, rarity);
     }
-    console.log('- dna: ' + newDna.join('-'));
+    console.log("- dna: " + newDna.join("-"));
 
     // propagate information about required layer contained within config into a mapping object
     // = prepare for drawing
@@ -234,9 +245,9 @@ const startCreating = async () => {
       // write the image to the output directory
       saveImage(editionCount);
       let nftMetadata = generateMetadata(newDna, editionCount, attributesList);
-      metadataList.push(nftMetadata)
-      console.log('- metadata: ' + JSON.stringify(nftMetadata));
-      console.log('- edition ' + editionCount + ' created.');
+      metadataList.push(nftMetadata);
+      console.log("- metadata: " + JSON.stringify(nftMetadata));
+      console.log("- edition " + editionCount + " created.");
       console.log();
     });
     dnaListByRarity[rarity].push(newDna);
